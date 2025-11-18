@@ -47,17 +47,25 @@ npm install
 npm run dev
 ```
 
-**일반 사용자용 설치 파일 (권장):**
+**일반 사용자용 설치 파일 (곧 출시 예정):**
 
-1. [Releases](https://github.com/yourusername/PeroEngine/releases)에서 다운로드:
-   - Windows: `PeroEngine-Setup.exe`
-   - macOS: `PeroEngine.dmg`
-   - Linux: `PeroEngine.AppImage`
+> ⚠️ 아직 공식 릴리즈 버전이 없습니다. 아래 개발자 모드로 실행하거나, 직접 빌드해서 사용하세요.
 
-2. 설치 파일 실행 후 첫 실행 시 자동으로:
-   - ✅ Ollama 설치 확인 및 자동 설치
-   - ✅ AI 모델 다운로드 (약 2GB)
-   - ✅ 초기 설정 완료
+**설치 파일 빌드 방법:**
+
+```bash
+# 위의 개발자 설정 완료 후
+npm run build:win    # Windows용
+npm run build:mac    # macOS용
+npm run build:linux  # Linux용
+
+# dist/ 폴더에 설치 파일 생성됨
+```
+
+**첫 실행 시 자동 설치되는 항목:**
+- ✅ Ollama 설치 확인 및 자동 설치
+- ✅ AI 모델 다운로드 (약 2GB)
+- ✅ 초기 설정 완료
 
 **특징:**
 - 🖥️ 독립 실행형 데스크톱 앱
