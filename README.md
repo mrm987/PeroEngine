@@ -38,7 +38,35 @@ PeroEngine은 2D 이미지 한 장으로 음성 대화형 AI 어시스턴트를 
   디스크: 50GB SSD
 ```
 
-### 설치
+### 옵션 1: 데스크톱 앱 (권장)
+
+```bash
+# 1. 리포지토리 클론
+git clone https://github.com/yourusername/PeroEngine.git
+cd PeroEngine
+
+# 2. Python 의존성 설치
+pip install -r requirements.txt
+
+# 3. Node.js 의존성 설치
+npm install
+
+# 4. Ollama 설치 (LLM용)
+# https://ollama.ai 에서 다운로드
+
+# 5. 개발 모드 실행
+npm run dev
+```
+
+**특징:**
+- 🖥️ 독립 실행형 데스크톱 앱
+- 🔔 시스템 트레이에서 백그라운드 실행
+- ⌨️ 전역 단축키 (Ctrl+Shift+P)로 빠른 호출
+- 📦 설치 파일 빌드 가능 (.exe, .dmg, .AppImage)
+
+자세한 내용: [electron/README.md](electron/README.md)
+
+### 옵션 2: 웹 버전
 
 ```bash
 # 1. 리포지토리 클론
@@ -59,9 +87,11 @@ pip install -r requirements.txt
 python run_server.py
 ```
 
+브라우저에서 `http://localhost:8000` 접속
+
 ### 첫 AI 어시스턴트 만들기
 
-1. 브라우저에서 `http://localhost:8000` 접속
+1. 앱 실행 또는 웹 접속
 2. 캐릭터 이미지 업로드 (PNG/JPG)
 3. 이름과 성격 설정
 4. 생성 버튼 클릭!
@@ -71,33 +101,40 @@ python run_server.py
 ```
 PeroEngine/
 ├── src/pero_engine/          # 핵심 소스 코드
-│   ├── llm/                  # LLM 통합 (Ollama, OpenAI)
-│   ├── tts/                  # 음성 합성 (MeloTTS, Edge TTS)
+│   ├── llm/                  # LLM 통합 (Ollama, OpenAI, Claude)
+│   ├── tts/                  # 음성 합성 (Edge TTS, OpenAI TTS)
 │   ├── asr/                  # 음성 인식 (Whisper)
 │   ├── animation/            # 이미지 → 애니메이션
 │   ├── config/               # 설정 관리
 │   └── server.py             # FastAPI 서버
-├── frontend/                 # 웹 UI
+├── electron/                 # 데스크톱 앱 (Electron)
+│   ├── main.js               # 메인 프로세스
+│   ├── preload.js            # Preload 스크립트
+│   ├── dev.js                # 개발 모드 실행
+│   ├── build.js              # 빌드 스크립트
+│   └── assets/               # 아이콘 등 리소스
+├── static/                   # 웹 UI
 ├── characters/               # 캐릭터 저장소
 ├── models/                   # 로컬 모델 저장
 ├── config.yaml               # 메인 설정 파일
-└── run_server.py             # 실행 스크립트
+├── package.json              # Node.js 설정
+└── run_server.py             # Python 서버 실행
 ```
 
 ## 🛠️ 기술 스택
 
 - **Backend**: FastAPI, Python 3.10+
-- **LLM**: Ollama (Llama 3.2, Qwen 2.5)
-- **TTS**: MeloTTS, Edge TTS (선택)
-- **ASR**: Faster-Whisper
-- **Animation**: Live2D WebGL, 2D 스프라이트
+- **Desktop**: Electron, Node.js
+- **LLM**: Ollama (로컬), OpenAI/Claude (선택)
+- **TTS**: Edge TTS (기본), OpenAI TTS (선택)
+- **ASR**: Whisper
+- **Animation**: 2D 스프라이트 (Live2D 지원 예정)
 
 ## 📖 문서
 
-- [설치 가이드](docs/installation.md)
-- [설정 가이드](docs/configuration.md)
-- [API 문서](docs/api.md)
-- [마켓플레이스 가이드](docs/marketplace.md)
+- [데스크톱 앱 가이드](electron/README.md)
+- [API Provider 설정](docs/API_PROVIDERS.md)
+- [아이콘 가이드](electron/assets/README.md)
 
 ## 🤝 기여
 
