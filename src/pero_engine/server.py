@@ -171,8 +171,8 @@ async def health_check():
 @app.post("/character/create")
 async def create_character(
     name: str,
-    image: UploadFile = File(...),
-    persona: str = "",
+    personality: str = "",
+    image: UploadFile = File(None),
 ):
     """캐릭터 생성 (이미지 업로드)"""
     try:
@@ -181,17 +181,19 @@ async def create_character(
         character_dir = Path(settings.system.characters_dir) / character_id
         character_dir.mkdir(parents=True, exist_ok=True)
 
-        # 이미지 저장
-        image_path = character_dir / "character.png"
-        with open(image_path, "wb") as f:
-            shutil.copyfileobj(image.file, f)
+        # 이미지 저장 (있는 경우에만)
+        image_path = None
+        if image and image.filename:
+            image_path = character_dir / "character.png"
+            with open(image_path, "wb") as f:
+                shutil.copyfileobj(image.file, f)
 
         # 메타데이터 저장
         metadata = {
             "id": character_id,
             "name": name,
-            "persona": persona or settings.character.default_persona,
-            "image_path": str(image_path),
+            "personality": personality or settings.character.default_persona,
+            "image_path": str(image_path) if image_path else None,
         }
 
         import json
