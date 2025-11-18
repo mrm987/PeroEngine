@@ -12,7 +12,14 @@ import shutil
 from .config import get_settings
 from .llm import BaseLLM, LLMFactory
 from .tts import BaseTTS, TTSFactory
-from .asr import WhisperClient
+
+# ASR은 선택적으로 import (whisper 없으면 건너뜀)
+try:
+    from .asr import WhisperClient
+    ASR_AVAILABLE = True
+except ImportError:
+    WhisperClient = None
+    ASR_AVAILABLE = False
 
 # FastAPI 앱 생성
 app = FastAPI(
