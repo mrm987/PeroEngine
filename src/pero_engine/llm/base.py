@@ -7,7 +7,9 @@ class BaseLLM(ABC):
     """LLM 기본 클래스"""
 
     @abstractmethod
-    async def chat(self, message: str, context: list[dict] = None) -> str:
+    async def chat(
+        self, message: str, context: list[dict] = None, system_prompt: str = None
+    ) -> str:
         """일반 채팅"""
         pass
 

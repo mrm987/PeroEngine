@@ -33,15 +33,31 @@ class ClaudeClient(BaseLLM):
             print(f"⚠️  Claude API 오류: {e}")
             return False
 
-    async def chat(self, message: str, context: list[dict] = None) -> str:
+    async def chat(
+        self, message: str, context: list[dict] = None, system_prompt: str = None
+    ) -> str:
         """채팅 (전체 응답 반환)"""
-        messages = context or []
+        messages = []
+
+        # 대화 히스토리 추가
+        if context:
+            messages.extend(context)
+
+        # 사용자 메시지 추가
         messages.append({"role": "user", "content": message})
 
         try:
-            response = await self.client.messages.create(
-                model=self.model, max_tokens=4096, messages=messages
-            )
+            # Claude는 system을 별도 파라미터로 전달
+            kwargs = {
+                "model": self.model,
+                "max_tokens": 4096,
+                "messages": messages,
+            }
+
+            if system_prompt:
+                kwargs["system"] = system_prompt
+
+            response = await self.client.messages.create(**kwargs)
 
             return response.content[0].text
 

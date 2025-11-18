@@ -224,7 +224,17 @@ async def chat(request: ChatRequest):
         if not llm_client:
             return {"error": "LLM 클라이언트가 초기화되지 않았습니다."}
 
-        response = await llm_client.chat(request.message)
+        # 캐릭터 페르소나를 시스템 프롬프트로 전달
+        system_prompt = settings.character.default_persona
+
+        # TODO: 향후 character_id로 실제 캐릭터의 페르소나 로드
+        # if request.character_id != "default":
+        #     character_metadata = load_character(request.character_id)
+        #     system_prompt = character_metadata.get("personality", system_prompt)
+
+        response = await llm_client.chat(
+            request.message, system_prompt=system_prompt
+        )
 
         return {"success": True, "message": response}
 

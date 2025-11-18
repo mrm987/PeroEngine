@@ -29,9 +29,21 @@ class OpenAIClient(BaseLLM):
             print(f"⚠️  OpenAI API 오류: {e}")
             return False
 
-    async def chat(self, message: str, context: list[dict] = None) -> str:
+    async def chat(
+        self, message: str, context: list[dict] = None, system_prompt: str = None
+    ) -> str:
         """채팅 (전체 응답 반환)"""
-        messages = context or []
+        messages = []
+
+        # 시스템 프롬프트 추가
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # 대화 히스토리 추가
+        if context:
+            messages.extend(context)
+
+        # 사용자 메시지 추가
         messages.append({"role": "user", "content": message})
 
         try:

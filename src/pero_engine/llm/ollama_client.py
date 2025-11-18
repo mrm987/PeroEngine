@@ -64,12 +64,24 @@ class OllamaClient(BaseLLM):
             print(f"❌ 모델 확인 중 오류: {e}")
             return False
 
-    async def chat(self, message: str, context: list[dict] = None) -> str:
+    async def chat(
+        self, message: str, context: list[dict] = None, system_prompt: str = None
+    ) -> str:
         """채팅 (전체 응답 반환)"""
         if not await self.ensure_model_exists():
             return "모델을 사용할 수 없습니다. Ollama가 실행 중인지 확인하세요."
 
-        messages = context or []
+        messages = []
+
+        # 시스템 프롬프트 추가 (캐릭터 페르소나)
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # 대화 히스토리 추가
+        if context:
+            messages.extend(context)
+
+        # 사용자 메시지 추가
         messages.append({"role": "user", "content": message})
 
         try:

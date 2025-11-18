@@ -20,7 +20,7 @@ llm:
   # Ollama 설정 (로컬)
   ollama:
     base_url: "http://localhost:11434"
-    model: "llama3.2:3b"  # 백그라운드용 경량 모델
+    model: "qwen2.5:7b"  # 기본 모델 (3b → 7b로 변경)
     model_active: "qwen2.5:7b"  # 활성 모드용 모델
     auto_download: true  # 모델 자동 다운로드
 
