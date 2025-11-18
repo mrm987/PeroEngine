@@ -36,13 +36,19 @@ llm:
 
 # TTS 설정
 tts:
-  provider: "edge"  # edge, openai (현재는 edge만)
+  provider: "edge"  # edge, openai
 
   # Edge TTS 설정 (무료 API)
   edge:
     voice: "ko-KR-SunHiNeural"  # 한국어 여성 목소리
     rate: "+0%"
     volume: "+0%"
+
+  # OpenAI TTS 설정 (선택적 API)
+  openai:
+    api_key: ""  # 비워두면 비활성화
+    model: "tts-1"  # tts-1 or tts-1-hd
+    voice: "alloy"  # alloy, echo, fable, onyx, nova, shimmer
 
 # ASR 설정
 asr:

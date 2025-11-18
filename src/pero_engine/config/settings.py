@@ -49,9 +49,16 @@ class EdgeTTSConfig(BaseModel):
     volume: str = "+0%"
 
 
+class OpenAITTSConfig(BaseModel):
+    api_key: str = ""
+    model: str = "tts-1"
+    voice: str = "alloy"
+
+
 class TTSConfig(BaseModel):
     provider: Literal["edge", "openai"] = "edge"
     edge: EdgeTTSConfig = Field(default_factory=EdgeTTSConfig)
+    openai: OpenAITTSConfig = Field(default_factory=OpenAITTSConfig)
 
 
 class WhisperConfig(BaseModel):

@@ -10,8 +10,8 @@ import uuid
 import shutil
 
 from .config import get_settings
-from .llm import OllamaClient
-from .tts import EdgeTTSClient
+from .llm import BaseLLM, LLMFactory
+from .tts import BaseTTS, TTSFactory
 from .asr import WhisperClient
 
 # FastAPI 앱 생성
@@ -40,8 +40,8 @@ Path("temp").mkdir(exist_ok=True)
 
 
 # 전역 클라이언트
-llm_client: OllamaClient = None
-tts_client: EdgeTTSClient = None
+llm_client: BaseLLM = None
+tts_client: BaseTTS = None
 asr_client: WhisperClient = None
 
 
@@ -65,30 +65,56 @@ async def startup_event():
     print("=" * 60)
 
     # LLM 클라이언트 초기화
-    print("\n📚 LLM 클라이언트 초기화 중...")
-    llm_client = OllamaClient(
-        base_url=settings.llm.ollama.base_url,
-        model=settings.llm.ollama.model,
-        auto_download=settings.llm.ollama.auto_download,
-    )
+    print(f"\n📚 LLM 클라이언트 초기화 중... (Provider: {settings.llm.provider})")
+    try:
+        llm_client = LLMFactory.create(
+            provider=settings.llm.provider,
+            # Ollama
+            ollama_base_url=settings.llm.ollama.base_url,
+            ollama_model=settings.llm.ollama.model,
+            ollama_auto_download=settings.llm.ollama.auto_download,
+            # OpenAI
+            openai_api_key=settings.llm.openai.api_key,
+            openai_model=settings.llm.openai.model,
+            # Claude
+            claude_api_key=settings.llm.claude.api_key,
+            claude_model=settings.llm.claude.model,
+        )
 
-    # Ollama 서버 확인
-    if await llm_client.is_available():
-        print("✅ Ollama 서버 연결 성공!")
-        # 모델 다운로드
-        await llm_client.ensure_model_exists()
-    else:
-        print("⚠️  Ollama 서버에 연결할 수 없습니다.")
-        print("   https://ollama.ai 에서 Ollama를 설치하고 실행하세요.")
+        if await llm_client.is_available():
+            print(f"✅ {settings.llm.provider.upper()} LLM 연결 성공!")
+
+            # Ollama 전용: 모델 다운로드
+            if settings.llm.provider == "ollama" and hasattr(
+                llm_client, "ensure_model_exists"
+            ):
+                await llm_client.ensure_model_exists()
+        else:
+            print(f"⚠️  {settings.llm.provider.upper()} LLM에 연결할 수 없습니다.")
+
+    except Exception as e:
+        print(f"❌ LLM 초기화 실패: {e}")
+        llm_client = None
 
     # TTS 클라이언트 초기화
-    print("\n🎤 TTS 클라이언트 초기화 중...")
-    tts_client = EdgeTTSClient(
-        voice=settings.tts.edge.voice,
-        rate=settings.tts.edge.rate,
-        volume=settings.tts.edge.volume,
-    )
-    print("✅ Edge TTS 준비 완료!")
+    print(f"\n🎤 TTS 클라이언트 초기화 중... (Provider: {settings.tts.provider})")
+    try:
+        tts_client = TTSFactory.create(
+            provider=settings.tts.provider,
+            # Edge TTS
+            edge_voice=settings.tts.edge.voice,
+            edge_rate=settings.tts.edge.rate,
+            edge_volume=settings.tts.edge.volume,
+            # OpenAI TTS
+            openai_api_key=settings.tts.openai.api_key,
+            openai_model=settings.tts.openai.model,
+            openai_voice=settings.tts.openai.voice,
+        )
+        print(f"✅ {settings.tts.provider.upper()} TTS 준비 완료!")
+
+    except Exception as e:
+        print(f"❌ TTS 초기화 실패: {e}")
+        tts_client = None
 
     # ASR 클라이언트 초기화
     print("\n🎧 ASR 클라이언트 초기화 중...")
