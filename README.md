@@ -32,18 +32,28 @@ PeroEngine은 2D 이미지 한 장으로 음성 대화형 AI 어시스턴트를 
 
 ### 옵션 1: 데스크톱 앱 (권장)
 
+**처음 설치:**
 ```bash
 # 1. 리포지토리 클론
-git clone https://github.com/yourusername/PeroEngine.git
+git clone -b claude/explore-project-01MmDTbSrX6Qecs8i8VeA63N https://github.com/mrm987/PeroEngine.git
 cd PeroEngine
 
 # 2. Python 의존성 설치
 pip install -r requirements.txt
 
-# 3. Node.js 의존성 설치
+# 3. Node.js 의존성 설치 (Node.js 설치 필요: https://nodejs.org)
 npm install
 
-# 4. 개발 모드 실행 (Ollama는 별도 설치 필요)
+# 4. Ollama 설치 (https://ollama.ai)
+
+# 5. 개발 모드 실행
+npm run dev
+```
+
+**업데이트 (이후):**
+```bash
+cd PeroEngine
+git pull  # 최신 코드 받기
 npm run dev
 ```
 
@@ -76,28 +86,31 @@ npm run build:linux  # Linux용
 
 자세한 내용: [electron/README.md](electron/README.md)
 
-### 옵션 2: 웹 버전
+### 옵션 2: 웹 버전 (빠른 테스트용)
 
+**처음 설치:**
 ```bash
 # 1. 리포지토리 클론
-git clone https://github.com/yourusername/PeroEngine.git
+git clone -b claude/explore-project-01MmDTbSrX6Qecs8i8VeA63N https://github.com/mrm987/PeroEngine.git
 cd PeroEngine
 
-# 2. Python 가상환경 생성
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. 의존성 설치
+# 2. 의존성 설치
 pip install -r requirements.txt
 
-# 4. Ollama 설치 (LLM용)
-# https://ollama.ai 에서 다운로드
+# 3. Ollama 설치 (https://ollama.ai)
 
-# 5. 서버 실행
+# 4. 서버 실행
 python run_server.py
 ```
 
-브라우저에서 `http://localhost:8000` 접속
+**업데이트 (이후):**
+```bash
+cd PeroEngine
+git pull  # 최신 코드 받기
+python run_server.py
+```
+
+브라우저에서 **`http://localhost:8000/static/index.html`** 접속
 
 ### 첫 AI 어시스턴트 만들기
 
@@ -108,7 +121,7 @@ python run_server.py
 4. 생성 버튼 클릭!
 
 **웹 버전:**
-1. 브라우저에서 접속
+1. `http://localhost:8000/static/index.html` 접속
 2. 캐릭터 이미지 업로드 (PNG/JPG)
 3. 이름과 성격 설정
 4. 생성 버튼 클릭!
