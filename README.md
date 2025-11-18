@@ -6,20 +6,12 @@ PeroEngine은 2D 이미지 한 장으로 음성 대화형 AI 어시스턴트를 
 
 ## ✨ 핵심 특징
 
-- 🖼️ **이미지 1장 → AI 어시스턴트**: Live2D 제작 없이 이미지만으로 캐릭터 생성
-- 🎮 **백그라운드 동반자**: 게임하면서도 FPS 영향 <2%
-- 🔒 **완전 오프라인**: 모든 기능 로컬 실행 가능
+- 🖼️ **이미지 1장 → AI 어시스턴트**: 복잡한 제작 과정 없이 이미지만으로 캐릭터 생성
+- 🎮 **백그라운드 동반자**: 게임하면서도 FPS 영향 최소화
+- 🔒 **완전 로컬**: 모든 기능 오프라인 실행 가능 (API는 선택사항)
 - ⚡ **동적 모드 전환**: 시스템 부하에 따라 자동으로 경량/고성능 모드 전환
 - 🛒 **마켓플레이스 준비**: 통일된 규격으로 캐릭터/음성/페르소나 거래
-
-## 🎯 차별점
-
-| 특징 | Open-LLM-VTuber | PeroEngine |
-|------|-----------------|------------|
-| 캐릭터 생성 | Live2D 수동 제작 | **이미지 1장 자동** |
-| 진입 장벽 | 높음 | **매우 낮음** |
-| 게임 중 사용 | 어려움 | **최적화됨** |
-| 기본 TTS | Edge TTS (API) | **MeloTTS (로컬)** |
+- 📦 **원클릭 설치**: exe 하나로 모든 것이 자동 설치
 
 ## 🚀 빠른 시작
 
@@ -51,18 +43,28 @@ pip install -r requirements.txt
 # 3. Node.js 의존성 설치
 npm install
 
-# 4. Ollama 설치 (LLM용)
-# https://ollama.ai 에서 다운로드
-
-# 5. 개발 모드 실행
+# 4. 개발 모드 실행 (Ollama는 별도 설치 필요)
 npm run dev
 ```
+
+**일반 사용자용 설치 파일 (권장):**
+
+1. [Releases](https://github.com/yourusername/PeroEngine/releases)에서 다운로드:
+   - Windows: `PeroEngine-Setup.exe`
+   - macOS: `PeroEngine.dmg`
+   - Linux: `PeroEngine.AppImage`
+
+2. 설치 파일 실행 후 첫 실행 시 자동으로:
+   - ✅ Ollama 설치 확인 및 자동 설치
+   - ✅ AI 모델 다운로드 (약 2GB)
+   - ✅ 초기 설정 완료
 
 **특징:**
 - 🖥️ 독립 실행형 데스크톱 앱
 - 🔔 시스템 트레이에서 백그라운드 실행
 - ⌨️ 전역 단축키 (Ctrl+Shift+P)로 빠른 호출
-- 📦 설치 파일 빌드 가능 (.exe, .dmg, .AppImage)
+- 📦 **완전 자동 설치** - exe 하나면 끝!
+- 🤖 Ollama 자동 설치 및 모델 다운로드
 
 자세한 내용: [electron/README.md](electron/README.md)
 
@@ -91,7 +93,14 @@ python run_server.py
 
 ### 첫 AI 어시스턴트 만들기
 
-1. 앱 실행 또는 웹 접속
+**데스크톱 앱:**
+1. PeroEngine 실행 (첫 실행 시 자동 설정 진행)
+2. 캐릭터 이미지 업로드 (PNG/JPG)
+3. 이름과 성격 설정
+4. 생성 버튼 클릭!
+
+**웹 버전:**
+1. 브라우저에서 접속
 2. 캐릭터 이미지 업로드 (PNG/JPG)
 3. 이름과 성격 설정
 4. 생성 버튼 클릭!
@@ -146,5 +155,4 @@ MIT License
 
 ## 🙏 크레딧
 
-- Inspired by [Open-LLM-VTuber](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber)
-- Built with [Ollama](https://ollama.ai)
+- Built with [Ollama](https://ollama.ai) for local LLM inference

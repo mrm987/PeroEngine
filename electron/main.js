@@ -6,12 +6,14 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain } = require('ele
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const installer = require('./installer');
 
 // 개발 모드 확인
 const isDev = process.argv.includes('--dev');
 
 // 전역 변수
 let mainWindow = null;
+let setupWindow = null;
 let tray = null;
 let pythonProcess = null;
 const PYTHON_PORT = 8000;
@@ -191,12 +193,53 @@ function registerGlobalShortcuts() {
 }
 
 /**
+ * Setup Wizard 창 생성
+ */
+function createSetupWindow() {
+    setupWindow = new BrowserWindow({
+        width: 700,
+        height: 600,
+        resizable: false,
+        title: 'PeroEngine 초기 설정',
+        icon: path.join(__dirname, 'assets', 'icon.png'),
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'setup-preload.js')
+        },
+        autoHideMenuBar: true,
+    });
+
+    setupWindow.loadFile(path.join(__dirname, 'setup-wizard.html'));
+
+    if (isDev) {
+        setupWindow.webContents.openDevTools();
+    }
+
+    setupWindow.on('closed', () => {
+        setupWindow = null;
+    });
+
+    console.log('✅ Setup Wizard 창 생성 완료');
+}
+
+/**
  * 앱 준비 완료
  */
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     console.log('=' .repeat(60));
     console.log('🎭 PeroEngine Desktop 시작 중...');
     console.log('=' .repeat(60));
+
+    // 첫 실행 확인 (개발 모드에서는 스킵)
+    if (!isDev && installer.isFirstRun()) {
+        console.log('🔧 첫 실행 감지 - Setup Wizard 시작');
+        createSetupWindow();
+        return;
+    }
+
+    // 정상 시작
+    console.log('✅ 이미 설정 완료됨 - 정상 시작');
 
     // Python 서버 시작
     startPythonServer();
@@ -283,6 +326,114 @@ ipcMain.handle('close-window', () => {
     if (mainWindow) {
         mainWindow.hide();
     }
+});
+
+/**
+ * Setup Wizard IPC 핸들러
+ */
+
+// Ollama 설치 확인
+ipcMain.handle('setup:check-ollama', async () => {
+    try {
+        const installed = await installer.checkOllamaInstalled();
+        console.log(`Ollama 설치 여부: ${installed}`);
+        return installed;
+    } catch (error) {
+        console.error('Ollama 확인 실패:', error);
+        return false;
+    }
+});
+
+// Ollama 설치
+ipcMain.handle('setup:install-ollama', async () => {
+    try {
+        console.log('📥 Ollama 설치 시작...');
+
+        const success = await installer.installOllama((progress) => {
+            // 진행률 전송 (다운로드 단계)
+            if (setupWindow) {
+                setupWindow.webContents.send('setup:model-progress', progress * 0.5);
+            }
+        });
+
+        if (success) {
+            console.log('✅ Ollama 설치 완료');
+
+            // 설치 완료 후 서비스 시작 대기
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+
+        return success;
+    } catch (error) {
+        console.error('❌ Ollama 설치 실패:', error);
+        return false;
+    }
+});
+
+// 모델 다운로드
+ipcMain.handle('setup:download-model', async () => {
+    try {
+        console.log('📥 모델 다운로드 시작...');
+
+        // config.yaml에서 모델명 읽기
+        const configPath = isDev
+            ? path.join(__dirname, '..', 'config.yaml')
+            : path.join(process.resourcesPath, 'config.yaml');
+
+        let modelName = 'llama3.2:3b'; // 기본값
+
+        if (fs.existsSync(configPath)) {
+            const configContent = fs.readFileSync(configPath, 'utf8');
+            const match = configContent.match(/model:\s*"(.+?)"/);
+            if (match) {
+                modelName = match[1];
+            }
+        }
+
+        console.log(`대상 모델: ${modelName}`);
+
+        const success = await installer.downloadOllamaModel(modelName, (progress) => {
+            if (setupWindow) {
+                setupWindow.webContents.send('setup:model-progress', progress);
+            }
+        });
+
+        return success;
+    } catch (error) {
+        console.error('❌ 모델 다운로드 실패:', error);
+        return false;
+    }
+});
+
+// 설정 완료
+ipcMain.on('setup:finish', () => {
+    console.log('✅ Setup Wizard 완료');
+
+    // 설정 완료 플래그 생성
+    installer.markSetupComplete();
+
+    // Setup 창 닫기
+    if (setupWindow) {
+        setupWindow.close();
+        setupWindow = null;
+    }
+
+    // 메인 앱 시작
+    console.log('🚀 메인 애플리케이션 시작...');
+
+    // Python 서버 시작
+    startPythonServer();
+
+    // 윈도우 생성
+    createWindow();
+
+    // 시스템 트레이 생성
+    createTray();
+
+    // 전역 단축키 등록
+    registerGlobalShortcuts();
+
+    console.log('✅ PeroEngine 시작 완료!');
 });
 
 // 자동 시작 설정 (선택사항)
