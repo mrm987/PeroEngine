@@ -49,7 +49,7 @@ Path("temp").mkdir(exist_ok=True)
 # 전역 클라이언트
 llm_client: BaseLLM = None
 tts_client: BaseTTS = None
-asr_client: WhisperClient = None
+asr_client = None  # WhisperClient 또는 None
 
 
 class ChatRequest(BaseModel):
@@ -123,14 +123,21 @@ async def startup_event():
         print(f"❌ TTS 초기화 실패: {e}")
         tts_client = None
 
-    # ASR 클라이언트 초기화
-    print("\n🎧 ASR 클라이언트 초기화 중...")
-    asr_client = WhisperClient(
-        model=settings.asr.whisper.model,
-        language=settings.asr.whisper.language,
-        device=settings.asr.whisper.device,
-    )
-    print("✅ Whisper ASR 준비 완료!")
+    # ASR 클라이언트 초기화 (선택 사항)
+    if ASR_AVAILABLE:
+        print("\n🎧 ASR 클라이언트 초기화 중...")
+        try:
+            asr_client = WhisperClient(
+                model=settings.asr.whisper.model,
+                language=settings.asr.whisper.language,
+                device=settings.asr.whisper.device,
+            )
+            print("✅ Whisper ASR 준비 완료!")
+        except Exception as e:
+            print(f"❌ ASR 초기화 실패: {e}")
+            asr_client = None
+    else:
+        print("\n⚠️  ASR 비활성화됨 (whisper 패키지 없음)")
 
     print("\n" + "=" * 60)
     print(f"✅ PeroEngine 서버 준비 완료!")
@@ -156,8 +163,8 @@ async def health_check():
     return {
         "status": "healthy",
         "llm": "online" if ollama_ok else "offline",
-        "tts": "online",
-        "asr": "online",
+        "tts": "online" if tts_client else "offline",
+        "asr": "online" if asr_client else "offline",
     }
 
 
@@ -283,6 +290,12 @@ async def text_to_speech(request: TTSRequest):
 async def speech_to_text(audio: UploadFile = File(...)):
     """음성 → 텍스트 변환"""
     try:
+        if not asr_client:
+            return JSONResponse(
+                status_code=503,
+                content={"success": False, "error": "ASR 클라이언트가 사용 불가능합니다."}
+            )
+
         # 임시 파일 저장
         audio_id = str(uuid.uuid4())
         audio_path = f"temp/{audio_id}.wav"
@@ -307,9 +320,9 @@ async def speech_to_text(audio: UploadFile = File(...)):
 
 # 정적 파일 서빙 (프론트엔드)
 try:
-    app.mount("/static", StaticFiles(directory="frontend"), name="static")
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 except RuntimeError:
-    print("⚠️  프론트엔드 디렉토리를 찾을 수 없습니다. API만 실행합니다.")
+    print("⚠️  static 디렉토리를 찾을 수 없습니다. API만 실행합니다.")
 
 
 if __name__ == "__main__":

@@ -368,7 +368,7 @@
                     formData.append('image', imageFile);
                 }
 
-                const response = await fetch('/api/characters/create', {
+                const response = await fetch('/character/create', {
                     method: 'POST',
                     body: formData
                 });
@@ -376,7 +376,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    currentCharacter = data.character;
+                    currentCharacter = data.character_id;
                     showStatus('캐릭터가 생성되었습니다!', 'success');
 
                     // 대화 탭으로 전환
@@ -402,7 +402,7 @@
             input.value = '';
 
             try {
-                const response = await fetch('/api/chat', {
+                const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -413,7 +413,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    addMessage(data.response, 'assistant');
+                    addMessage(data.message, 'assistant');
                 } else {
                     addMessage('오류가 발생했습니다: ' + data.detail, 'assistant');
                 }
