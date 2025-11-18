@@ -1,7 +1,7 @@
 """PeroEngine FastAPI 서버"""
 import asyncio
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, UploadFile, File, Form, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -170,8 +170,8 @@ async def health_check():
 
 @app.post("/character/create")
 async def create_character(
-    name: str,
-    personality: str = "",
+    name: str = Form(...),
+    personality: str = Form(""),
     image: UploadFile = File(None),
 ):
     """캐릭터 생성 (이미지 업로드)"""
