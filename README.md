@@ -153,14 +153,6 @@ PeroEngine/
 - [API Provider 설정](docs/API_PROVIDERS.md)
 - [아이콘 가이드](electron/assets/README.md)
 
-## 🤝 기여
-
-PeroEngine은 오픈소스 프로젝트입니다! 기여를 환영합니다.
-
 ## 📄 라이선스
 
 MIT License
-
-## 🙏 크레딧
-
-- Built with [Ollama](https://ollama.ai) for local LLM inference
