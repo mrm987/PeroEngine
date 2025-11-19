@@ -1,0 +1,50 @@
+:root {
+    --primary: #8b5cf6;
+    /* Violet 500 */
+    --primary-glow: rgba(139, 92, 246, 0.5);
+    --bg-dark: rgba(20, 20, 30, 0.85);
+    /* Semi-transparent dark */
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    /* Prevent text selection in app-like feel */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: transparent;
+    /* CRITICAL for Electron transparency */
+    color: var(--text-main);
+    overflow: hidden;
+    /* Hide scrollbars */
+    height: 100vh;
+    width: 100vw;
+}
+
+#root {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Custom Scrollbar if needed later */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}

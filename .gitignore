@@ -1,34 +1,7 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-.venv
-
-# PeroEngine 특화
-characters/
-models/
-temp/
-*.mp3
-*.wav
-*.mpeg
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
+node_modules
+dist
+release
 .DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# 설정 (선택사항)
-# config.yaml  # 사용자 설정을 커밋하지 않으려면 주석 해제
+.env
+__pycache__
+*.pyc
