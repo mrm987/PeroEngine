@@ -2,6 +2,7 @@
 from typing import Optional
 from .base import BaseAnimation
 from .musetalk_client import MuseTalkClient
+from .liveportrait_client import LivePortraitClient
 
 
 class AnimationFactory:
@@ -9,25 +10,40 @@ class AnimationFactory:
 
     @staticmethod
     def create(
-        provider: str = "musetalk",
+        provider: str = "liveportrait",
         # MuseTalk 옵션
         musetalk_model_path: Optional[str] = None,
         musetalk_device: str = "auto",
         musetalk_fps: int = 25,
+        # LivePortrait 옵션
+        liveportrait_path: Optional[str] = None,
+        joyvasa_path: Optional[str] = None,
+        liveportrait_device: str = "auto",
+        liveportrait_fps: int = 30,
+        liveportrait_use_tensorrt: bool = True,
+        liveportrait_backend: str = "joyvasa",
     ) -> BaseAnimation:
         """
         애니메이션 클라이언트 생성
 
         Args:
-            provider: 'musetalk', 'sadtalker', 'wav2lip' 등
-            musetalk_model_path: MuseTalk 모델 경로
-            musetalk_device: MuseTalk 디바이스
-            musetalk_fps: MuseTalk FPS
+            provider: 'liveportrait', 'musetalk', 'sadtalker', 'wav2lip' 등
+            musetalk_*: MuseTalk 관련 옵션
+            liveportrait_*: LivePortrait 관련 옵션
 
         Returns:
             BaseAnimation 인스턴스
         """
-        if provider == "musetalk":
+        if provider == "liveportrait":
+            return LivePortraitClient(
+                liveportrait_path=liveportrait_path,
+                joyvasa_path=joyvasa_path,
+                device=liveportrait_device,
+                fps=liveportrait_fps,
+                use_tensorrt=liveportrait_use_tensorrt,
+                backend=liveportrait_backend,
+            )
+        elif provider == "musetalk":
             return MuseTalkClient(
                 model_path=musetalk_model_path,
                 device=musetalk_device,

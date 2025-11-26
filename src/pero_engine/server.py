@@ -149,9 +149,17 @@ async def startup_event():
         try:
             animation_client = AnimationFactory.create(
                 provider=settings.animation.provider,
+                # MuseTalk 옵션
                 musetalk_model_path=settings.animation.musetalk.model_path,
                 musetalk_device=settings.animation.musetalk.device,
                 musetalk_fps=settings.animation.musetalk.fps,
+                # LivePortrait 옵션
+                liveportrait_path=settings.animation.liveportrait.liveportrait_path,
+                joyvasa_path=settings.animation.liveportrait.joyvasa_path,
+                liveportrait_device=settings.animation.liveportrait.device,
+                liveportrait_fps=settings.animation.liveportrait.fps,
+                liveportrait_use_tensorrt=settings.animation.liveportrait.use_tensorrt,
+                liveportrait_backend=settings.animation.liveportrait.backend,
             )
 
             if await animation_client.is_available():
@@ -160,7 +168,9 @@ async def startup_event():
                 print(
                     f"⚠️  {settings.animation.provider.upper()} Animation을 사용할 수 없습니다."
                 )
-                animation_client = None
+                print("   더미 비디오 생성 모드로 동작합니다.")
+                # 더미 모드로 계속 사용 가능하도록 유지
+                # animation_client = None
 
         except Exception as e:
             print(f"❌ Animation 초기화 실패: {e}")

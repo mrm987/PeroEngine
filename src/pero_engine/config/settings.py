@@ -83,10 +83,32 @@ class MuseTalkConfig(BaseModel):
     fps: int = 25
 
 
+class LivePortraitConfig(BaseModel):
+    """LivePortrait + JoyVASA 설정"""
+    liveportrait_path: Optional[str] = None  # FasterLivePortrait 경로
+    joyvasa_path: Optional[str] = None  # JoyVASA 경로
+    device: Literal["auto", "cpu", "cuda"] = "auto"
+    fps: int = 30
+    use_tensorrt: bool = True  # TensorRT 최적화 사용
+    backend: Literal["joyvasa", "template"] = "joyvasa"  # 오디오 드리븐 vs 템플릿
+
+
+class IdleConfig(BaseModel):
+    """Idle 애니메이션 설정"""
+    enabled: bool = True
+    blink_interval_min: float = 2.0
+    blink_interval_max: float = 6.0
+    head_sway_amount: float = 0.02
+    breathing_amount: float = 0.03
+    preset: Literal["calm", "alert", "sleepy"] = "calm"
+
+
 class AnimationConfig(BaseModel):
-    provider: Literal["musetalk", "sadtalker", "wav2lip"] = "musetalk"
+    provider: Literal["musetalk", "liveportrait", "sadtalker", "wav2lip"] = "liveportrait"
     enable: bool = True
     musetalk: MuseTalkConfig = Field(default_factory=MuseTalkConfig)
+    liveportrait: LivePortraitConfig = Field(default_factory=LivePortraitConfig)
+    idle: IdleConfig = Field(default_factory=IdleConfig)
     # 레거시 설정
     quality: Literal["low", "medium", "high"] = "medium"
     expressions: list[str] = ["neutral", "happy", "sad", "surprised", "thinking"]

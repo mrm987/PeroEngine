@@ -71,17 +71,35 @@ character:
 
 # 애니메이션 설정
 animation:
-  provider: "musetalk"  # musetalk, sadtalker, wav2lip
+  provider: "liveportrait"  # liveportrait, musetalk, sadtalker, wav2lip
   enable: true  # 애니메이션 활성화 여부
 
-  # MuseTalk 설정 (실시간 립싱크)
-  musetalk:
-    model_path: null  # null이면 자동 다운로드
+  # LivePortrait + JoyVASA 설정 (권장)
+  liveportrait:
+    liveportrait_path: null  # FasterLivePortrait 경로 (null이면 ~/FasterLivePortrait)
+    joyvasa_path: null  # JoyVASA 경로 (null이면 ~/JoyVASA)
     device: "auto"  # auto, cpu, cuda
-    fps: 25  # 출력 비디오 FPS
+    fps: 30  # 출력 비디오 FPS
+    use_tensorrt: true  # TensorRT 최적화 (RTX GPU 권장)
+    backend: "joyvasa"  # joyvasa (오디오 드리븐) 또는 template (모션 템플릿)
 
-  # 레거시 설정 (향후 표정 애니메이션 등에 사용)
-  quality: "medium"  # low, medium, high
+  # Idle 애니메이션 설정
+  idle:
+    enabled: true
+    blink_interval_min: 2.0  # 눈 깜빡임 최소 간격 (초)
+    blink_interval_max: 6.0  # 눈 깜빡임 최대 간격 (초)
+    head_sway_amount: 0.02  # 머리 흔들림 크기
+    breathing_amount: 0.03  # 호흡 크기
+    preset: "calm"  # calm, alert, sleepy
+
+  # MuseTalk 설정 (레거시)
+  musetalk:
+    model_path: null
+    device: "auto"
+    fps: 25
+
+  # 레거시 설정
+  quality: "medium"
   expressions: ["neutral", "happy", "sad", "surprised", "thinking"]
 
 # 동적 모드 전환 설정
