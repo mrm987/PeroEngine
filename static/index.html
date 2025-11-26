@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PeroEngine - 립싱크 테스트</title>
+    <title>PeroEngine - 립싱크</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a2e;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,309 +22,211 @@
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
+            text-align: center;
             max-width: 800px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
+            color: #fff;
             margin-bottom: 40px;
+            font-size: 3em;
         }
 
-        .upload-section {
+        .character-image {
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
         }
 
-        .upload-section h2 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.2em;
+        video {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: none;
         }
 
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            width: 100%;
+        video.show {
+            display: block;
         }
 
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
-
-        .file-input-button {
-            background: #667eea;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            display: inline-block;
-            cursor: pointer;
-            transition: background 0.3s;
-            width: 100%;
-            text-align: center;
-        }
-
-        .file-input-button:hover {
-            background: #5568d3;
-        }
-
-        .preview {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .preview img {
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
         }
 
         textarea {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             font-size: 16px;
-            resize: vertical;
-            min-height: 100px;
+            resize: none;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
             margin-bottom: 20px;
-            font-family: inherit;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         textarea:focus {
             outline: none;
             border-color: #667eea;
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .button {
+        button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 15px 40px;
             border: none;
             border-radius: 10px;
             font-size: 18px;
             cursor: pointer;
+            transition: transform 0.2s;
             width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .button:hover {
+        button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .button:disabled {
-            background: #ccc;
+        button:disabled {
+            background: #444;
             cursor: not-allowed;
             transform: none;
         }
 
         .status {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .file-input {
             display: none;
         }
 
-        .status.show {
-            display: block;
-        }
-
-        .status.loading {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .video-container {
-            margin-top: 30px;
-            text-align: center;
-            display: none;
-        }
-
-        .video-container.show {
-            display: block;
-        }
-
-        video {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .upload-btn {
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎬 PeroEngine</h1>
-        <p class="subtitle">캐릭터 이미지를 움직이게 만들기</p>
 
-        <div class="upload-section">
-            <h2>1️⃣ 캐릭터 이미지 업로드</h2>
-            <div class="file-input-wrapper">
-                <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
-                <div class="file-input-button">이미지 선택</div>
-            </div>
-            <div id="imagePreview" class="preview"></div>
-        </div>
+        <img id="characterImage" class="character-image" style="display:none;" />
+        <video id="videoPlayer" controls></video>
 
-        <div class="upload-section">
-            <h2>2️⃣ 말할 내용 입력</h2>
-            <textarea id="textInput" placeholder="캐릭터가 말할 내용을 입력하세요...&#10;&#10;예: 안녕하세요! 저는 PeroEngine입니다."></textarea>
-        </div>
+        <div class="controls">
+            <input type="file" id="imageInput" class="file-input" accept="image/*" onchange="loadImage(event)">
+            <button class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                📸 캐릭터 이미지 선택
+            </button>
 
-        <button class="button" onclick="generateVideo()" id="generateBtn">
-            🎥 립싱크 비디오 생성
-        </button>
+            <textarea id="textInput" placeholder="말할 내용을 입력하세요..."></textarea>
 
-        <div id="status" class="status"></div>
+            <button id="generateBtn" onclick="generate()">
+                🎥 생성
+            </button>
 
-        <div id="videoContainer" class="video-container">
-            <h2>✨ 생성된 비디오</h2>
-            <video id="videoPlayer" controls autoplay></video>
+            <div id="status" class="status"></div>
         </div>
     </div>
 
     <script>
-        let uploadedImage = null;
+        let imageFile = null;
 
-        function previewImage(event) {
+        function loadImage(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            uploadedImage = file;
-
+            imageFile = file;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const preview = document.getElementById('imagePreview');
-                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                const img = document.getElementById('characterImage');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('videoPlayer').classList.remove('show');
             };
             reader.readAsDataURL(file);
         }
 
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status show ${type}`;
-        }
-
-        function hideStatus() {
-            const status = document.getElementById('status');
-            status.className = 'status';
-        }
-
-        async function generateVideo() {
+        async function generate() {
             const text = document.getElementById('textInput').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('status');
 
-            if (!uploadedImage) {
-                showStatus('⚠️ 캐릭터 이미지를 먼저 업로드해주세요!', 'error');
+            if (!imageFile) {
+                status.textContent = '⚠️ 이미지를 먼저 선택하세요';
                 return;
             }
 
             if (!text) {
-                showStatus('⚠️ 말할 내용을 입력해주세요!', 'error');
+                status.textContent = '⚠️ 텍스트를 입력하세요';
                 return;
             }
 
-            const btn = document.getElementById('generateBtn');
             btn.disabled = true;
             btn.textContent = '⏳ 생성 중...';
-
-            showStatus('🎤 음성 생성 중...', 'loading');
+            status.textContent = '🎤 음성 생성 중...';
 
             try {
-                // 1단계: TTS로 음성 생성
-                const ttsResponse = await fetch('/tts', {
+                // TTS
+                const ttsRes = await fetch('/tts', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text: text })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
                 });
 
-                if (!ttsResponse.ok) {
-                    throw new Error('음성 생성 실패');
-                }
+                if (!ttsRes.ok) throw new Error('음성 생성 실패');
+                const audioBlob = await ttsRes.blob();
 
-                const audioBlob = await ttsResponse.blob();
+                status.textContent = '🎬 립싱크 비디오 생성 중...';
 
-                showStatus('🎬 립싱크 비디오 생성 중... (시간이 걸릴 수 있습니다)', 'loading');
-
-                // 2단계: 이미지 + 오디오 → 비디오
+                // Animate
                 const formData = new FormData();
-                formData.append('image', uploadedImage);
+                formData.append('image', imageFile);
                 formData.append('audio', audioBlob, 'speech.mp3');
 
-                const animateResponse = await fetch('/animate', {
+                const animateRes = await fetch('/animate', {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!animateResponse.ok) {
-                    const errorData = await animateResponse.json();
+                if (!animateRes.ok) {
+                    const errorData = await animateRes.json();
                     throw new Error(errorData.error || '비디오 생성 실패');
                 }
 
-                // 3단계: 비디오 재생
-                const videoBlob = await animateResponse.blob();
+                // Play video
+                const videoBlob = await animateRes.blob();
                 const videoUrl = URL.createObjectURL(videoBlob);
 
-                const videoPlayer = document.getElementById('videoPlayer');
-                videoPlayer.src = videoUrl;
+                const video = document.getElementById('videoPlayer');
+                const img = document.getElementById('characterImage');
 
-                document.getElementById('videoContainer').classList.add('show');
-                showStatus('✅ 비디오 생성 완료!', 'success');
+                img.style.display = 'none';
+                video.src = videoUrl;
+                video.classList.add('show');
+                video.play();
+
+                status.textContent = '✅ 완료!';
 
             } catch (error) {
-                console.error('Error:', error);
-                showStatus(`❌ 오류: ${error.message}`, 'error');
+                status.textContent = `❌ ${error.message}`;
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🎥 립싱크 비디오 생성';
+                btn.textContent = '🎥 생성';
             }
         }
     </script>
