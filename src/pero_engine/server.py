@@ -12,6 +12,7 @@ import shutil
 from .config import get_settings
 from .llm import BaseLLM, LLMFactory
 from .tts import BaseTTS, TTSFactory
+from .animation import BaseAnimation, AnimationFactory
 
 # ASR은 선택적으로 import (whisper 없으면 건너뜀)
 try:
@@ -50,6 +51,7 @@ Path("temp").mkdir(exist_ok=True)
 llm_client: BaseLLM = None
 tts_client: BaseTTS = None
 asr_client = None  # WhisperClient 또는 None
+animation_client: BaseAnimation = None
 
 
 class ChatRequest(BaseModel):
@@ -65,7 +67,7 @@ class TTSRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """서버 시작 시 초기화"""
-    global llm_client, tts_client, asr_client
+    global llm_client, tts_client, asr_client, animation_client
 
     print("=" * 60)
     print("🚀 PeroEngine 서버 시작 중...")
@@ -138,6 +140,33 @@ async def startup_event():
             asr_client = None
     else:
         print("\n⚠️  ASR 비활성화됨 (whisper 패키지 없음)")
+
+    # Animation 클라이언트 초기화 (선택 사항)
+    if settings.animation.enable:
+        print(
+            f"\n🎬 Animation 클라이언트 초기화 중... (Provider: {settings.animation.provider})"
+        )
+        try:
+            animation_client = AnimationFactory.create(
+                provider=settings.animation.provider,
+                musetalk_model_path=settings.animation.musetalk.model_path,
+                musetalk_device=settings.animation.musetalk.device,
+                musetalk_fps=settings.animation.musetalk.fps,
+            )
+
+            if await animation_client.is_available():
+                print(f"✅ {settings.animation.provider.upper()} Animation 준비 완료!")
+            else:
+                print(
+                    f"⚠️  {settings.animation.provider.upper()} Animation을 사용할 수 없습니다."
+                )
+                animation_client = None
+
+        except Exception as e:
+            print(f"❌ Animation 초기화 실패: {e}")
+            animation_client = None
+    else:
+        print("\n⚠️  Animation 비활성화됨")
 
     print("\n" + "=" * 60)
     print(f"✅ PeroEngine 서버 준비 완료!")
@@ -330,11 +359,152 @@ async def speech_to_text(audio: UploadFile = File(...)):
         )
 
 
+@app.post("/animate")
+async def generate_animation(
+    image: UploadFile = File(...),
+    audio: UploadFile = File(...),
+):
+    """이미지 + 오디오 → 립싱크 비디오 생성"""
+    try:
+        if not animation_client:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "error": "Animation 클라이언트가 사용 불가능합니다.",
+                },
+            )
+
+        # 고유 ID 생성
+        video_id = str(uuid.uuid4())
+
+        # 임시 파일 저장
+        image_path = f"temp/{video_id}_image.png"
+        audio_path = f"temp/{video_id}_audio.wav"
+        output_path = f"temp/{video_id}_output.mp4"
+
+        # 이미지 저장
+        with open(image_path, "wb") as f:
+            shutil.copyfileobj(image.file, f)
+
+        # 오디오 저장
+        with open(audio_path, "wb") as f:
+            shutil.copyfileobj(audio.file, f)
+
+        # 립싱크 비디오 생성
+        success = await animation_client.generate(image_path, audio_path, output_path)
+
+        # 임시 입력 파일 삭제
+        Path(image_path).unlink(missing_ok=True)
+        Path(audio_path).unlink(missing_ok=True)
+
+        if success and Path(output_path).exists():
+            return FileResponse(
+                output_path,
+                media_type="video/mp4",
+                filename=f"animation_{video_id}.mp4",
+            )
+        else:
+            return JSONResponse(
+                status_code=500, content={"success": False, "error": "비디오 생성 실패"}
+            )
+
+    except Exception as e:
+        print(f"❌ Animation 오류: {e}")
+        return JSONResponse(
+            status_code=500, content={"success": False, "error": str(e)}
+        )
+
+
+@app.post("/chat/animated")
+async def chat_with_animation(request: ChatRequest):
+    """채팅 + TTS + 립싱크 비디오 생성 (통합 엔드포인트)"""
+    try:
+        if not llm_client:
+            return JSONResponse(
+                status_code=503,
+                content={"success": False, "error": "LLM 클라이언트가 사용 불가능합니다."},
+            )
+
+        if not tts_client:
+            return JSONResponse(
+                status_code=503,
+                content={"success": False, "error": "TTS 클라이언트가 사용 불가능합니다."},
+            )
+
+        if not animation_client:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "error": "Animation 클라이언트가 사용 불가능합니다.",
+                },
+            )
+
+        # 1. LLM 응답 생성
+        system_prompt = settings.character.default_persona
+        response_text = await llm_client.chat(
+            request.message, system_prompt=system_prompt
+        )
+
+        # 2. TTS로 음성 생성
+        video_id = str(uuid.uuid4())
+        audio_path = f"temp/{video_id}_speech.mp3"
+
+        tts_success = await tts_client.synthesize(response_text, audio_path)
+        if not tts_success:
+            return JSONResponse(
+                status_code=500, content={"success": False, "error": "TTS 생성 실패"}
+            )
+
+        # 3. 캐릭터 이미지 찾기
+        # TODO: character_id로 실제 캐릭터 이미지 로드
+        # 임시: 기본 이미지 경로
+        character_image = "static/default_character.png"
+
+        # 4. 립싱크 비디오 생성
+        output_path = f"temp/{video_id}_animated.mp4"
+
+        animation_success = await animation_client.generate(
+            character_image, audio_path, output_path
+        )
+
+        # 임시 오디오 파일 삭제
+        Path(audio_path).unlink(missing_ok=True)
+
+        if animation_success and Path(output_path).exists():
+            return {
+                "success": True,
+                "message": response_text,
+                "video_url": f"/temp/{video_id}_animated.mp4",
+            }
+        else:
+            # 비디오 생성 실패 시 텍스트와 오디오만 반환
+            return {
+                "success": True,
+                "message": response_text,
+                "video_url": None,
+                "warning": "비디오 생성 실패",
+            }
+
+    except Exception as e:
+        print(f"❌ Animated Chat 오류: {e}")
+        return JSONResponse(
+            status_code=500, content={"success": False, "error": str(e)}
+        )
+
+
 # 정적 파일 서빙 (프론트엔드)
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 except RuntimeError:
     print("⚠️  static 디렉토리를 찾을 수 없습니다. API만 실행합니다.")
+
+# 임시 파일 서빙 (비디오, 오디오 등)
+try:
+    app.mount("/temp", StaticFiles(directory="temp"), name="temp")
+except RuntimeError:
+    print("⚠️  temp 디렉토리를 찾을 수 없습니다.")
 
 
 if __name__ == "__main__":

@@ -71,7 +71,16 @@ character:
 
 # 애니메이션 설정
 animation:
-  fps: 30  # 프레임 레이트
+  provider: "musetalk"  # musetalk, sadtalker, wav2lip
+  enable: true  # 애니메이션 활성화 여부
+
+  # MuseTalk 설정 (실시간 립싱크)
+  musetalk:
+    model_path: null  # null이면 자동 다운로드
+    device: "auto"  # auto, cpu, cuda
+    fps: 25  # 출력 비디오 FPS
+
+  # 레거시 설정 (향후 표정 애니메이션 등에 사용)
   quality: "medium"  # low, medium, high
   expressions: ["neutral", "happy", "sad", "surprised", "thinking"]
 

@@ -77,8 +77,17 @@ class CharacterConfig(BaseModel):
     default_persona: str = "당신은 친근하고 유쾌한 AI 어시스턴트입니다."
 
 
+class MuseTalkConfig(BaseModel):
+    model_path: Optional[str] = None
+    device: Literal["auto", "cpu", "cuda"] = "auto"
+    fps: int = 25
+
+
 class AnimationConfig(BaseModel):
-    fps: int = 30
+    provider: Literal["musetalk", "sadtalker", "wav2lip"] = "musetalk"
+    enable: bool = True
+    musetalk: MuseTalkConfig = Field(default_factory=MuseTalkConfig)
+    # 레거시 설정
     quality: Literal["low", "medium", "high"] = "medium"
     expressions: list[str] = ["neutral", "happy", "sad", "surprised", "thinking"]
 
