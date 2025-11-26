@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PeroEngine - AI 어시스턴트</title>
+    <title>PeroEngine - 립싱크 테스트</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -30,424 +30,303 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
-        .header {
+        h1 {
             text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
             margin-bottom: 40px;
         }
 
-        .header h1 {
-            font-size: 36px;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 16px;
-        }
-
-        .section {
+        .upload-section {
             margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
         }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
+        .upload-section h2 {
             color: #333;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            font-size: 1.2em;
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #555;
-        }
-
-        .input-group input[type="text"],
-        .input-group textarea {
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
         }
 
-        .input-group input[type="text"]:focus,
-        .input-group textarea:focus {
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-input-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: inline-block;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .file-input-button:hover {
+            background: #5568d3;
+        }
+
+        .preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .preview img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+
+        textarea:focus {
             outline: none;
             border-color: #667eea;
         }
 
-        .input-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .file-upload {
-            border: 3px dashed #e0e0e0;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-upload:hover {
-            border-color: #667eea;
-            background: #f5f5f5;
-        }
-
-        .file-upload input[type="file"] {
-            display: none;
-        }
-
-        .file-upload-text {
-            color: #999;
-            font-size: 14px;
-        }
-
-        .preview-image {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 20px auto;
-            display: none;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .chat-container {
-            background: #f9f9f9;
-            border-radius: 12px;
-            padding: 20px;
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            max-width: 70%;
-        }
-
-        .message.user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-        }
-
-        .message.assistant {
-            background: white;
-            color: #333;
-            border: 1px solid #e0e0e0;
-        }
-
-        .input-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-container input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        button {
-            padding: 12px 30px;
+        .button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 15px 30px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 18px;
             cursor: pointer;
+            width: 100%;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        button:hover {
+        .button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        button:disabled {
-            opacity: 0.5;
+        .button:disabled {
+            background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
 
         .status {
-            text-align: center;
+            margin-top: 20px;
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            text-align: center;
             display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
         }
 
         .status.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            display: block;
+            background: #d4edda;
+            color: #155724;
         }
 
         .status.error {
-            background: #ffebee;
-            color: #c62828;
-            display: block;
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        .status.info {
-            background: #e3f2fd;
-            color: #1565c0;
-            display: block;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 12px;
-            background: #f5f5f5;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .tab-button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .tab-content {
+        .video-container {
+            margin-top: 30px;
+            text-align: center;
             display: none;
         }
 
-        .tab-content.active {
+        .video-container.show {
             display: block;
+        }
+
+        video {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎭 PeroEngine</h1>
-            <p>이미지 한 장이면 나만의 AI 어시스턴트가 생깁니다</p>
+        <h1>🎬 PeroEngine</h1>
+        <p class="subtitle">캐릭터 이미지를 움직이게 만들기</p>
+
+        <div class="upload-section">
+            <h2>1️⃣ 캐릭터 이미지 업로드</h2>
+            <div class="file-input-wrapper">
+                <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+                <div class="file-input-button">이미지 선택</div>
+            </div>
+            <div id="imagePreview" class="preview"></div>
         </div>
 
-        <div class="status" id="status"></div>
-
-        <div class="tab-buttons">
-            <button class="tab-button active" onclick="switchTab('create')">캐릭터 생성</button>
-            <button class="tab-button" onclick="switchTab('chat')">대화하기</button>
+        <div class="upload-section">
+            <h2>2️⃣ 말할 내용 입력</h2>
+            <textarea id="textInput" placeholder="캐릭터가 말할 내용을 입력하세요...&#10;&#10;예: 안녕하세요! 저는 PeroEngine입니다."></textarea>
         </div>
 
-        <!-- 캐릭터 생성 탭 -->
-        <div class="tab-content active" id="tab-create">
-            <div class="section">
-                <div class="section-title">1. 캐릭터 이미지</div>
-                <div class="file-upload" onclick="document.getElementById('imageInput').click()">
-                    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
-                    <div class="file-upload-text">
-                        클릭해서 이미지 선택 또는 드래그 앤 드롭
-                    </div>
-                </div>
-                <img id="previewImg" class="preview-image">
-            </div>
+        <button class="button" onclick="generateVideo()" id="generateBtn">
+            🎥 립싱크 비디오 생성
+        </button>
 
-            <div class="section">
-                <div class="section-title">2. 캐릭터 정보</div>
-                <div class="input-group">
-                    <label>이름</label>
-                    <input type="text" id="characterName" placeholder="예: 페로">
-                </div>
-                <div class="input-group">
-                    <label>성격 및 설정</label>
-                    <textarea id="characterPersonality" placeholder="예: 밝고 긍정적인 성격의 AI 어시스턴트입니다. 사용자를 친근하게 도와줍니다."></textarea>
-                </div>
-            </div>
+        <div id="status" class="status"></div>
 
-            <button onclick="createCharacter()" style="width: 100%;">캐릭터 생성</button>
-        </div>
-
-        <!-- 대화 탭 -->
-        <div class="tab-content" id="tab-chat">
-            <div class="section">
-                <div class="section-title">AI 어시스턴트와 대화</div>
-                <div class="chat-container" id="chatContainer">
-                    <div class="message assistant">
-                        안녕하세요! 무엇을 도와드릴까요?
-                    </div>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." onkeypress="handleEnter(event)">
-                    <button onclick="sendMessage()">전송</button>
-                </div>
-            </div>
+        <div id="videoContainer" class="video-container">
+            <h2>✨ 생성된 비디오</h2>
+            <video id="videoPlayer" controls autoplay></video>
         </div>
     </div>
 
     <script>
-        let currentCharacter = null;
-
-        function switchTab(tabName) {
-            // 탭 버튼 활성화
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // 탭 콘텐츠 표시
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById('tab-' + tabName).classList.add('active');
-        }
+        let uploadedImage = null;
 
         function previewImage(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('previewImg');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+
+            uploadedImage = file;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
         }
 
         function showStatus(message, type) {
             const status = document.getElementById('status');
             status.textContent = message;
-            status.className = 'status ' + type;
-            setTimeout(() => {
-                status.className = 'status';
-            }, 5000);
+            status.className = `status show ${type}`;
         }
 
-        async function createCharacter() {
-            const name = document.getElementById('characterName').value;
-            const personality = document.getElementById('characterPersonality').value;
-            const imageFile = document.getElementById('imageInput').files[0];
+        function hideStatus() {
+            const status = document.getElementById('status');
+            status.className = 'status';
+        }
 
-            if (!name) {
-                showStatus('이름을 입력해주세요', 'error');
+        async function generateVideo() {
+            const text = document.getElementById('textInput').value.trim();
+
+            if (!uploadedImage) {
+                showStatus('⚠️ 캐릭터 이미지를 먼저 업로드해주세요!', 'error');
                 return;
             }
 
-            if (!personality) {
-                showStatus('성격을 입력해주세요', 'error');
+            if (!text) {
+                showStatus('⚠️ 말할 내용을 입력해주세요!', 'error');
                 return;
             }
 
-            showStatus('캐릭터 생성 중...', 'info');
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 생성 중...';
+
+            showStatus('🎤 음성 생성 중...', 'loading');
 
             try {
-                // FormData 생성
-                const formData = new FormData();
-                formData.append('name', name);
-                formData.append('personality', personality);
-                if (imageFile) {
-                    formData.append('image', imageFile);
-                }
-
-                const response = await fetch('/character/create', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    currentCharacter = data.character_id;
-                    showStatus('캐릭터가 생성되었습니다!', 'success');
-
-                    // 대화 탭으로 전환
-                    setTimeout(() => {
-                        document.querySelectorAll('.tab-button')[1].click();
-                    }, 1500);
-                } else {
-                    showStatus('캐릭터 생성 실패: ' + data.detail, 'error');
-                }
-            } catch (error) {
-                showStatus('오류 발생: ' + error.message, 'error');
-            }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-
-            if (!message) return;
-
-            // 사용자 메시지 표시
-            addMessage(message, 'user');
-            input.value = '';
-
-            try {
-                const response = await fetch('/chat', {
+                // 1단계: TTS로 음성 생성
+                const ttsResponse = await fetch('/tts', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ text: text })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    addMessage(data.message, 'assistant');
-                } else {
-                    addMessage('오류가 발생했습니다: ' + data.detail, 'assistant');
+                if (!ttsResponse.ok) {
+                    throw new Error('음성 생성 실패');
                 }
+
+                const audioBlob = await ttsResponse.blob();
+
+                showStatus('🎬 립싱크 비디오 생성 중... (시간이 걸릴 수 있습니다)', 'loading');
+
+                // 2단계: 이미지 + 오디오 → 비디오
+                const formData = new FormData();
+                formData.append('image', uploadedImage);
+                formData.append('audio', audioBlob, 'speech.mp3');
+
+                const animateResponse = await fetch('/animate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!animateResponse.ok) {
+                    const errorData = await animateResponse.json();
+                    throw new Error(errorData.error || '비디오 생성 실패');
+                }
+
+                // 3단계: 비디오 재생
+                const videoBlob = await animateResponse.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                const videoPlayer = document.getElementById('videoPlayer');
+                videoPlayer.src = videoUrl;
+
+                document.getElementById('videoContainer').classList.add('show');
+                showStatus('✅ 비디오 생성 완료!', 'success');
+
             } catch (error) {
-                addMessage('오류가 발생했습니다: ' + error.message, 'assistant');
+                console.error('Error:', error);
+                showStatus(`❌ 오류: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎥 립싱크 비디오 생성';
             }
         }
-
-        function addMessage(text, sender) {
-            const chatContainer = document.getElementById('chatContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ' + sender;
-            messageDiv.textContent = text;
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function handleEnter(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        // 페이지 로드 시 서버 상태 확인
-        window.addEventListener('load', async () => {
-            try {
-                const response = await fetch('/');
-                const data = await response.json();
-                console.log('서버 상태:', data);
-                showStatus('서버가 정상적으로 실행 중입니다', 'success');
-            } catch (error) {
-                showStatus('서버 연결 실패', 'error');
-            }
-        });
     </script>
 </body>
 </html>
