@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pero - Character</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        /* 드래그 영역 (캐릭터 위) */
+        .drag-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            -webkit-app-region: drag;
+            cursor: move;
+        }
+
+        /* 말풍선 */
+        .speech-bubble {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 12px 20px;
+            max-width: 280px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .speech-bubble.visible {
+            opacity: 1;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.95);
+            border-bottom: 0;
+        }
+
+        /* 캐릭터 영역 */
+        .character-area {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* 캐릭터 이미지/비디오 */
+        .character {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* Idle 애니메이션 (CSS fallback) */
+        @keyframes idle-breathing {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.01) translateY(-2px); }
+        }
+
+        .character.idle {
+            animation: idle-breathing 4s ease-in-out infinite;
+        }
+
+        /* 상태 표시 */
+        .status-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-indicator.thinking {
+            background: #FF9800;
+            animation: pulse 1s infinite;
+        }
+
+        .status-indicator.speaking {
+            background: #2196F3;
+            animation: pulse 0.5s infinite;
+        }
+
+        .status-indicator.error {
+            background: #F44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        /* 컨트롤 버튼들 */
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .container:hover .controls {
+            opacity: 1;
+        }
+
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: transform 0.2s, background 0.2s;
+            -webkit-app-region: no-drag;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: white;
+        }
+
+        /* 입력 영역 */
+        .input-area {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 300px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .input-area.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .input-container button {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-container button:hover {
+            background: #5a6fd6;
+        }
+
+        /* 마이크 버튼 */
+        .mic-btn {
+            background: #F44336 !important;
+        }
+
+        .mic-btn.recording {
+            animation: pulse 0.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 드래그 핸들 -->
+        <div class="drag-handle"></div>
+
+        <!-- 말풍선 -->
+        <div class="speech-bubble" id="speechBubble">
+            안녕하세요! 무엇을 도와드릴까요?
+        </div>
+
+        <!-- 캐릭터 영역 -->
+        <div class="character-area">
+            <!-- 정적 이미지 (기본) -->
+            <img
+                id="characterImage"
+                class="character idle"
+                src=""
+                alt="Character"
+                style="display: none;"
+            >
+            <!-- 애니메이션 비디오 (말할 때) -->
+            <video
+                id="characterVideo"
+                class="character"
+                muted
+                playsinline
+                style="display: none;"
+            ></video>
+        </div>
+
+        <!-- 상태 표시 -->
+        <div class="status-indicator" id="statusIndicator"></div>
+
+        <!-- 컨트롤 버튼 -->
+        <div class="controls">
+            <button class="control-btn" id="btnChat" title="채팅">💬</button>
+            <button class="control-btn" id="btnMic" title="음성 입력">🎤</button>
+            <button class="control-btn" id="btnScreen" title="화면 보기">👁️</button>
+            <button class="control-btn" id="btnSettings" title="설정">⚙️</button>
+        </div>
+
+        <!-- 입력 영역 -->
+        <div class="input-area" id="inputArea">
+            <div class="input-container">
+                <input type="text" id="messageInput" placeholder="메시지를 입력하세요...">
+                <button id="btnSend">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 상태 관리
+        const state = {
+            isRecording: false,
+            isSpeaking: false,
+            isThinking: false,
+            inputVisible: false,
+            characterImage: null,
+        };
+
+        // DOM 요소
+        const elements = {
+            speechBubble: document.getElementById('speechBubble'),
+            characterImage: document.getElementById('characterImage'),
+            characterVideo: document.getElementById('characterVideo'),
+            statusIndicator: document.getElementById('statusIndicator'),
+            inputArea: document.getElementById('inputArea'),
+            messageInput: document.getElementById('messageInput'),
+            btnChat: document.getElementById('btnChat'),
+            btnMic: document.getElementById('btnMic'),
+            btnScreen: document.getElementById('btnScreen'),
+            btnSettings: document.getElementById('btnSettings'),
+            btnSend: document.getElementById('btnSend'),
+        };
+
+        // 말풍선 표시
+        function showSpeechBubble(text, duration = 5000) {
+            elements.speechBubble.textContent = text;
+            elements.speechBubble.classList.add('visible');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    elements.speechBubble.classList.remove('visible');
+                }, duration);
+            }
+        }
+
+        // 상태 업데이트
+        function updateStatus(status) {
+            elements.statusIndicator.className = 'status-indicator';
+            if (status) {
+                elements.statusIndicator.classList.add(status);
+            }
+        }
+
+        // 캐릭터 이미지 설정
+        function setCharacterImage(imagePath) {
+            elements.characterImage.src = imagePath;
+            elements.characterImage.style.display = 'block';
+            elements.characterVideo.style.display = 'none';
+            state.characterImage = imagePath;
+        }
+
+        // 애니메이션 비디오 재생
+        function playAnimation(videoPath, onEnd) {
+            elements.characterImage.style.display = 'none';
+            elements.characterVideo.style.display = 'block';
+            elements.characterVideo.src = videoPath;
+            elements.characterVideo.play();
+
+            elements.characterVideo.onended = () => {
+                // 다시 정적 이미지로
+                elements.characterImage.style.display = 'block';
+                elements.characterVideo.style.display = 'none';
+                if (onEnd) onEnd();
+            };
+        }
+
+        // 입력창 토글
+        function toggleInput() {
+            state.inputVisible = !state.inputVisible;
+            elements.inputArea.classList.toggle('visible', state.inputVisible);
+            if (state.inputVisible) {
+                elements.messageInput.focus();
+            }
+        }
+
+        // 메시지 전송
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+            if (!message) return;
+
+            elements.messageInput.value = '';
+            toggleInput();
+
+            updateStatus('thinking');
+            showSpeechBubble('생각 중...', 0);
+
+            try {
+                // IPC를 통해 메인 프로세스로 전송
+                const response = await window.pero.sendMessage(message);
+
+                updateStatus('speaking');
+                showSpeechBubble(response.message);
+
+                // 애니메이션 비디오가 있으면 재생
+                if (response.videoPath) {
+                    playAnimation(response.videoPath, () => {
+                        updateStatus('');
+                    });
+                } else {
+                    setTimeout(() => updateStatus(''), 3000);
+                }
+
+                // 오디오 재생
+                if (response.audioPath) {
+                    const audio = new Audio(response.audioPath);
+                    audio.play();
+                }
+
+            } catch (error) {
+                console.error('메시지 전송 실패:', error);
+                updateStatus('error');
+                showSpeechBubble('오류가 발생했어요...');
+            }
+        }
+
+        // 음성 입력
+        async function toggleRecording() {
+            if (state.isRecording) {
+                // 녹음 중지
+                state.isRecording = false;
+                elements.btnMic.classList.remove('recording');
+                await window.pero.stopRecording();
+            } else {
+                // 녹음 시작
+                state.isRecording = true;
+                elements.btnMic.classList.add('recording');
+                await window.pero.startRecording();
+            }
+        }
+
+        // 화면 인식
+        async function captureScreen() {
+            updateStatus('thinking');
+            showSpeechBubble('화면을 보고 있어요...', 0);
+
+            try {
+                const response = await window.pero.captureScreen();
+                updateStatus('');
+                showSpeechBubble(response.message);
+            } catch (error) {
+                console.error('화면 캡처 실패:', error);
+                updateStatus('error');
+                showSpeechBubble('화면을 볼 수 없어요...');
+            }
+        }
+
+        // 이벤트 리스너
+        elements.btnChat.addEventListener('click', toggleInput);
+        elements.btnMic.addEventListener('click', toggleRecording);
+        elements.btnScreen.addEventListener('click', captureScreen);
+        elements.btnSettings.addEventListener('click', () => {
+            window.pero.openSettings();
+        });
+        elements.btnSend.addEventListener('click', sendMessage);
+        elements.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // 초기화
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 캐릭터 이미지 로드
+            const config = await window.pero.getConfig();
+            if (config.characterImage) {
+                setCharacterImage(config.characterImage);
+            }
+
+            // IPC 이벤트 리스너 등록
+            window.pero.onSpeechBubble((text, duration) => {
+                showSpeechBubble(text, duration);
+            });
+
+            window.pero.onStatusChange((status) => {
+                updateStatus(status);
+            });
+
+            window.pero.onPlayAnimation((videoPath) => {
+                playAnimation(videoPath, () => {
+                    updateStatus('');
+                });
+            });
+
+            window.pero.onVoiceResult((text) => {
+                // 음성 인식 결과를 입력창에 표시
+                elements.messageInput.value = text;
+                if (!state.inputVisible) {
+                    toggleInput();
+                }
+            });
+
+            // IPC toggle-input 이벤트도 추가
+            if (window.pero.onToggleInput) {
+                window.pero.onToggleInput(() => {
+                    toggleInput();
+                });
+            }
+
+            // 인사
+            setTimeout(() => {
+                showSpeechBubble('안녕하세요! 무엇을 도와드릴까요?');
+            }, 1000);
+        });
+
+        // 외부에서 호출 가능한 함수들 (IPC)
+        window.peroUI = {
+            showSpeechBubble,
+            updateStatus,
+            setCharacterImage,
+            playAnimation,
+        };
+    </script>
+</body>
+</html>
