@@ -64,6 +64,11 @@ class TTSRequest(BaseModel):
     voice: str = "ko-KR-SunHiNeural"
 
 
+class VisionRequest(BaseModel):
+    image: str  # Base64 인코딩된 이미지
+    prompt: str = "이 화면에 무엇이 보이는지 한국어로 간단히 설명해주세요."
+
+
 @app.on_event("startup")
 async def startup_event():
     """서버 시작 시 초기화"""
@@ -364,6 +369,37 @@ async def speech_to_text(audio: UploadFile = File(...)):
 
     except Exception as e:
         print(f"❌ ASR 오류: {e}")
+        return JSONResponse(
+            status_code=500, content={"success": False, "error": str(e)}
+        )
+
+
+@app.post("/vision")
+async def analyze_image(request: VisionRequest):
+    """이미지 분석 (화면 인식)"""
+    try:
+        if not llm_client:
+            return JSONResponse(
+                status_code=503,
+                content={"success": False, "error": "LLM 클라이언트가 사용 불가능합니다."},
+            )
+
+        # Ollama Vision 기능 사용
+        if hasattr(llm_client, "vision"):
+            response = await llm_client.vision(
+                image_base64=request.image,
+                prompt=request.prompt,
+                vision_model="llava:7b",  # Vision 모델
+            )
+            return {"success": True, "message": response}
+        else:
+            return JSONResponse(
+                status_code=503,
+                content={"success": False, "error": "Vision 기능을 지원하지 않는 LLM입니다."},
+            )
+
+    except Exception as e:
+        print(f"❌ Vision 오류: {e}")
         return JSONResponse(
             status_code=500, content={"success": False, "error": str(e)}
         )

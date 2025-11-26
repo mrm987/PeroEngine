@@ -98,6 +98,72 @@ class OllamaClient(BaseLLM):
         except Exception as e:
             return f"오류: {str(e)}"
 
+    async def vision(
+        self,
+        image_base64: str,
+        prompt: str = "이 이미지에 무엇이 보이는지 설명해주세요.",
+        vision_model: str = "llava:7b",
+    ) -> str:
+        """이미지 분석 (Vision LLM)
+
+        Args:
+            image_base64: Base64 인코딩된 이미지 (data:image/... 접두사 제거 필요)
+            prompt: 이미지에 대한 질문
+            vision_model: 사용할 Vision 모델 (기본: llava:7b)
+
+        Returns:
+            Vision 모델의 응답
+        """
+        # data:image/png;base64, 접두사 제거
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
+        try:
+            response = await self.client.post(
+                f"{self.base_url}/api/generate",
+                json={
+                    "model": vision_model,
+                    "prompt": prompt,
+                    "images": [image_base64],
+                    "stream": False,
+                },
+                timeout=120.0,  # Vision은 시간이 더 걸릴 수 있음
+            )
+
+            if response.status_code == 200:
+                return response.json().get("response", "응답을 받지 못했습니다.")
+            else:
+                return f"Vision 오류: {response.status_code} - {response.text}"
+
+        except Exception as e:
+            return f"Vision 오류: {str(e)}"
+
+    async def ensure_vision_model(self, vision_model: str = "llava:7b") -> bool:
+        """Vision 모델이 설치되어 있는지 확인하고 자동 다운로드"""
+        try:
+            response = await self.client.get(f"{self.base_url}/api/tags")
+            if response.status_code != 200:
+                return False
+
+            models = response.json().get("models", [])
+            model_names = [m["name"] for m in models]
+
+            if vision_model in model_names:
+                return True
+
+            if self.auto_download:
+                print(f"📥 Vision 모델 '{vision_model}' 다운로드 중...")
+                pull_response = await self.client.post(
+                    f"{self.base_url}/api/pull",
+                    json={"name": vision_model, "stream": False},
+                    timeout=600.0,  # 모델 다운로드는 시간이 오래 걸림
+                )
+                return pull_response.status_code == 200
+
+            return False
+        except Exception:
+            return False
+
     async def chat_stream(
         self, message: str, context: list[dict] = None
     ) -> AsyncIterator[str]:
