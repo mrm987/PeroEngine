@@ -20,8 +20,8 @@ llm:
   # Ollama 설정 (로컬)
   ollama:
     base_url: "http://localhost:11434"
-    model: "qwen2.5:7b"  # 기본 모델 (3b → 7b로 변경)
-    model_active: "qwen2.5:7b"  # 활성 모드용 모델
+    model: "gpt-oss:20b"  # OpenAI 오픈소스 모델 (16GB RAM 필요)
+    model_active: "gpt-oss:20b"  # 활성 모드용 모델
     auto_download: true  # 모델 자동 다운로드
 
   # OpenAI 설정 (선택적 API)
