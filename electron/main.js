@@ -30,7 +30,6 @@ const isDev = process.argv.includes('--dev');
 let characterWindow = null;
 let tray = null;
 let pythonProcess = null;
-let isRecording = false;
 
 // 설정
 const CONFIG = {

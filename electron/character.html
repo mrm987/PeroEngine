@@ -221,14 +221,6 @@
             background: #5a6fd6;
         }
 
-        /* 마이크 버튼 */
-        .mic-btn {
-            background: #F44336 !important;
-        }
-
-        .mic-btn.recording {
-            animation: pulse 0.5s infinite;
-        }
     </style>
 </head>
 <body>
@@ -267,7 +259,6 @@
         <!-- 컨트롤 버튼 -->
         <div class="controls">
             <button class="control-btn" id="btnChat" title="채팅">💬</button>
-            <button class="control-btn" id="btnMic" title="음성 입력">🎤</button>
             <button class="control-btn" id="btnScreen" title="화면 보기">👁️</button>
             <button class="control-btn" id="btnSettings" title="설정">⚙️</button>
         </div>
@@ -284,7 +275,6 @@
     <script>
         // 상태 관리
         const state = {
-            isRecording: false,
             isSpeaking: false,
             isThinking: false,
             inputVisible: false,
@@ -300,7 +290,6 @@
             inputArea: document.getElementById('inputArea'),
             messageInput: document.getElementById('messageInput'),
             btnChat: document.getElementById('btnChat'),
-            btnMic: document.getElementById('btnMic'),
             btnScreen: document.getElementById('btnScreen'),
             btnSettings: document.getElementById('btnSettings'),
             btnSend: document.getElementById('btnSend'),
@@ -398,21 +387,6 @@
             }
         }
 
-        // 음성 입력
-        async function toggleRecording() {
-            if (state.isRecording) {
-                // 녹음 중지
-                state.isRecording = false;
-                elements.btnMic.classList.remove('recording');
-                await window.pero.stopRecording();
-            } else {
-                // 녹음 시작
-                state.isRecording = true;
-                elements.btnMic.classList.add('recording');
-                await window.pero.startRecording();
-            }
-        }
-
         // 화면 인식
         async function captureScreen() {
             updateStatus('thinking');
@@ -431,7 +405,6 @@
 
         // 이벤트 리스너
         elements.btnChat.addEventListener('click', toggleInput);
-        elements.btnMic.addEventListener('click', toggleRecording);
         elements.btnScreen.addEventListener('click', captureScreen);
         elements.btnSettings.addEventListener('click', () => {
             window.pero.openSettings();
@@ -464,15 +437,7 @@
                 });
             });
 
-            window.pero.onVoiceResult((text) => {
-                // 음성 인식 결과를 입력창에 표시
-                elements.messageInput.value = text;
-                if (!state.inputVisible) {
-                    toggleInput();
-                }
-            });
-
-            // IPC toggle-input 이벤트도 추가
+            // IPC toggle-input 이벤트
             if (window.pero.onToggleInput) {
                 window.pero.onToggleInput(() => {
                     toggleInput();

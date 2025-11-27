@@ -12,16 +12,6 @@ contextBridge.exposeInMainWorld('pero', {
         return await ipcRenderer.invoke('chat:send', message);
     },
 
-    // 음성 녹음 시작
-    startRecording: async () => {
-        return await ipcRenderer.invoke('voice:start');
-    },
-
-    // 음성 녹음 중지
-    stopRecording: async () => {
-        return await ipcRenderer.invoke('voice:stop');
-    },
-
     // 화면 캡처 및 인식
     captureScreen: async () => {
         return await ipcRenderer.invoke('screen:capture');
@@ -67,12 +57,6 @@ contextBridge.exposeInMainWorld('pero', {
     onPlayAnimation: (callback) => {
         ipcRenderer.on('ui:play-animation', (event, videoPath) => {
             callback(videoPath);
-        });
-    },
-
-    onVoiceResult: (callback) => {
-        ipcRenderer.on('voice:result', (event, text) => {
-            callback(text);
         });
     },
 
